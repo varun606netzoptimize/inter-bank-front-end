@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // ** React Imports
 import { useEffect, useState } from 'react'
 
@@ -34,9 +35,13 @@ const Header = styled(Box)(({ theme }) => ({
 }))
 
 const schema = yup.object().shape({
-  title: yup.string().required('This field is required!'),
-  balance: yup.string().required('This field is required!'),
-  address: yup.string().required('This field is required!')
+  bankName: yup.string().required('This field is required!'),
+  city: yup.string().required('This field is required!'),
+  state: yup.string().required('This field is required!'),
+  fdicNum: yup.number().required('This field is required!'),
+  fdicRegion: yup.string().required('This field is required!'),
+  totalAssets: yup.number().required('This field is required!'),
+  creditLimit: yup.number().required('This field is required!')
 })
 
 const ManageBankDrawer = props => {
@@ -56,11 +61,16 @@ const ManageBankDrawer = props => {
     mode: 'onChange',
     resolver: yupResolver(schema)
   })
+
   useEffect(() => {
     defaultValues = {
-      title: information?.title,
-      balance: information?.balance,
-      address: information?.address
+      bankName: information?.bankName,
+      city: information?.city,
+      state: information?.state,
+      fdicNum: Number(information?.fdicNum),
+      fdicRegion: information?.fdicRegion,
+      totalAssets: Number(information?.totalAssets),
+      creditLimit: Number(information?.creditLimit)
     }
     reset(defaultValues)
   }, [id, reset])
@@ -89,7 +99,7 @@ const ManageBankDrawer = props => {
       sx={{ '& .MuiDrawer-paper': { width: { xs: 300, sm: 400 } } }}
     >
       <Header>
-        <Typography variant='h6'>{id ? 'Update Bank Account' : 'Add Bank'}</Typography>
+        <Typography variant='h6'>{id ? 'Update Bank Account' : 'Add New Bank'}</Typography>
         <IconButton
           size='small'
           onClick={handleClose}
@@ -102,56 +112,139 @@ const ManageBankDrawer = props => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormControl fullWidth sx={{ mb: 4 }}>
             <Controller
-              name='title'
+              name='bankName'
               control={control}
               rules={{ required: true }}
               render={({ field: { value, onChange } }) => (
                 <TextField
                   InputLabelProps={{ shrink: true }}
                   value={value}
-                  label='Title'
+                  label='Bank Name'
                   onChange={onChange}
-                  error={Boolean(errors.title)}
+                  error={Boolean(errors.bankName)}
                 />
               )}
             />
-            {errors.title && <FormHelperText sx={{ color: 'error.main' }}>{errors.title.message}</FormHelperText>}
+            {errors.bankName && <FormHelperText sx={{ color: 'error.main' }}>{errors.bankName.message}</FormHelperText>}
           </FormControl>
 
           <FormControl fullWidth sx={{ mb: 4 }}>
             <Controller
-              name='balance'
+              name='city'
               control={control}
               rules={{ required: true }}
               render={({ field: { value, onChange } }) => (
                 <TextField
                   InputLabelProps={{ shrink: true }}
                   value={value}
-                  label='Balance'
+                  label='City'
                   onChange={onChange}
-                  placeholder='$'
-                  error={Boolean(errors.balance)}
+                  error={Boolean(errors.city)}
                 />
               )}
             />
-            {errors.balance && <FormHelperText sx={{ color: 'error.main' }}>{errors.balance.message}</FormHelperText>}
+            {errors.city && <FormHelperText sx={{ color: 'error.main' }}>{errors.city.message}</FormHelperText>}
           </FormControl>
+
           <FormControl fullWidth sx={{ mb: 4 }}>
             <Controller
-              name='address'
+              name='state'
               control={control}
               rules={{ required: true }}
               render={({ field: { value, onChange } }) => (
                 <TextField
                   InputLabelProps={{ shrink: true }}
                   value={value}
-                  label='Address'
+                  label='State'
                   onChange={onChange}
-                  error={Boolean(errors.address)}
+                  error={Boolean(errors.state)}
                 />
               )}
             />
-            {errors.address && <FormHelperText sx={{ color: 'error.main' }}>{errors.address.message}</FormHelperText>}
+            {errors.state && <FormHelperText sx={{ color: 'error.main' }}>{errors.state.message}</FormHelperText>}
+          </FormControl>
+
+          <FormControl fullWidth sx={{ mb: 4 }}>
+            <Controller
+              name='fdicNum'
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { value, onChange } }) => (
+                <TextField
+                  InputLabelProps={{ shrink: true }}
+                  value={value}
+                  type='number'
+                  label='FDIC Number'
+                  onChange={onChange}
+                  error={Boolean(errors.fdicNum)}
+                />
+              )}
+            />
+            {errors.fdicNum && <FormHelperText sx={{ color: 'error.main' }}>{errors.fdicNum.message}</FormHelperText>}
+          </FormControl>
+
+          <FormControl fullWidth sx={{ mb: 4 }}>
+            <Controller
+              name='fdicRegion'
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { value, onChange } }) => (
+                <TextField
+                  InputLabelProps={{ shrink: true }}
+                  value={value}
+                  label='FDIC Region'
+                  onChange={onChange}
+                  error={Boolean(errors.fdicRegion)}
+                />
+              )}
+            />
+            {errors.fdicRegion && (
+              <FormHelperText sx={{ color: 'error.main' }}>{errors.fdicRegion.message}</FormHelperText>
+            )}
+          </FormControl>
+
+          <FormControl fullWidth sx={{ mb: 4 }}>
+            <Controller
+              name='totalAssets'
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { value, onChange } }) => (
+                <TextField
+                  InputLabelProps={{ shrink: true }}
+                  value={value}
+                  label='Total Assets'
+                  type='number'
+                  onChange={onChange}
+                  placeholder='$'
+                  error={Boolean(errors.totalAssets)}
+                />
+              )}
+            />
+            {errors.totalAssets && (
+              <FormHelperText sx={{ color: 'error.main' }}>{errors.totalAssets.message}</FormHelperText>
+            )}
+          </FormControl>
+
+          <FormControl fullWidth sx={{ mb: 4 }}>
+            <Controller
+              name='creditLimit'
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { value, onChange } }) => (
+                <TextField
+                  InputLabelProps={{ shrink: true }}
+                  value={value}
+                  label='Credit Limit'
+                  type='number'
+                  onChange={onChange}
+                  placeholder='$'
+                  error={Boolean(errors.creditLimit)}
+                />
+              )}
+            />
+            {errors.creditLimit && (
+              <FormHelperText sx={{ color: 'error.main' }}>{errors.creditLimit.message}</FormHelperText>
+            )}
           </FormControl>
 
           <Box sx={{ display: 'flex', alignItems: 'center' }}>

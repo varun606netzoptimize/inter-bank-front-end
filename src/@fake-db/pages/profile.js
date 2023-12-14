@@ -3,31 +3,28 @@ import mock from 'src/@fake-db/mock'
 
 const data = {
   profileHeader: {
-    location: 'Vatican City',
-    joiningDate: 'April 2021',
-    fullName: 'Belle Ferguson',
-    designation: 'UX Designer',
-    profileImg: '/images/avatars/14.png',
+    location: 'Coral Gables, Florida',
+    joiningDate: 'April 2018',
+    fullName: 'Jorge Coloma',
+    designation: 'Interbank Contingent Liquidity Funding Exchange, LLC',
+    profileImg: '/images/avatars/DP.png',
     designationIcon: 'tabler:color-swatch',
     coverImg: '/images/pages/profile-banner.png'
   },
   profile: {
     about: [
-      { property: 'Full Name', value: 'John Doe', icon: 'tabler:user' },
+      { property: 'Full Name', value: 'Jorge Coloma', icon: 'tabler:user' },
       { property: 'Status', value: 'active', icon: 'tabler:check' },
-      { property: 'Role', value: 'Developer', icon: 'tabler:crown' },
+      { property: 'Role', value: 'Director', icon: 'tabler:crown' },
       { property: 'Country', value: 'USA', icon: 'tabler:flag' },
       { property: 'Language', value: 'English', icon: 'tabler:language' }
     ],
     contacts: [
       { property: 'Contact', value: '(123) 456-7890', icon: 'tabler:phone-call' },
-      { property: 'Skype', value: 'john.doe', icon: 'tabler:brand-skype' },
-      { property: 'Email', value: 'john.doe@example.com', icon: 'tabler:mail' }
+      { property: 'Skype', value: 'jorge.coloma', icon: 'tabler:brand-skype' },
+      { property: 'Email', value: 'jorge@interbank.com', icon: 'tabler:mail' }
     ],
-    teams: [
-      { property: 'Backend Developer', value: '(126 Members)', icon: 'tabler:brand-github', color: 'primary' },
-      { property: 'React Developer', value: '(98 Members)', icon: 'tabler:brand-react', color: 'info' }
-    ],
+
     overview: [
       { property: 'Task Compiled', value: '13.5k', icon: 'tabler:check' },
       { property: 'Connections', value: '897', icon: 'tabler:users' },

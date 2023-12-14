@@ -8,5 +8,6 @@ export const endpoint = {
   deleteBank: '/delete-bank',
   editUser: '/edit-user',
   invite: '/invite',
-  verifyInvitation: '/verify-invitation'
+  verifyInvitation: '/verify-invitation',
+  manageRequest: '/manage-request'
 }

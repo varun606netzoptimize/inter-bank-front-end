@@ -20,7 +20,6 @@ import FormControl from '@mui/material/FormControl'
 import CardContent from '@mui/material/CardContent'
 import Select from '@mui/material/Select'
 import TextField from '@mui/material/TextField'
-
 import { styled } from '@mui/material/styles'
 
 // ** Icon Imports
@@ -44,6 +43,7 @@ import { useAppDispatch, useAppSelector } from 'src/store'
 import ManageBankDrawer from 'src/views/apps/bank/ManageBankDrawer'
 import { Button, Dialog, DialogContent } from '@mui/material'
 import LoanRequestModal from '../loanRequestModal'
+import CircularProgress from '@mui/material'
 
 const CardTitle = styled(Typography)(({ theme }) => ({
   lineHeight: 1.6,
@@ -79,6 +79,7 @@ export default function bankRequests() {
   const [selectedBank, setSelectedBank] = useState(null)
   const [loanAmount, setLoanAmount] = useState(null)
   const [requestedAmount, setRequestedAmount] = useState(0)
+  const [requestedToBanks, setRequestedToBanks] = useState([])
 
   const [pageSize, setPageSize] = useState(10)
 
@@ -108,8 +109,8 @@ export default function bankRequests() {
     {
       flex: 0.25,
       minWidth: 280,
-      field: 'title',
-      headerName: 'Title',
+      field: 'bankName',
+      headerName: 'Bank Name',
       renderCell: ({ row }) => {
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -124,10 +125,23 @@ export default function bankRequests() {
                   '&:hover': { color: 'primary.main' }
                 }}
               >
-                {row?.title}
+                {row?.bankName}
               </Typography>
             </Box>
           </Box>
+        )
+      }
+    },
+    {
+      flex: 0.15,
+      minWidth: 120,
+      headerName: 'City',
+      field: 'city',
+      renderCell: ({ row }) => {
+        return (
+          <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary' }}>
+            {row?.city}
+          </Typography>
         )
       }
     },
@@ -135,12 +149,40 @@ export default function bankRequests() {
     {
       flex: 0.15,
       minWidth: 120,
-      headerName: 'Balance',
-      field: 'balance',
+      headerName: 'State',
+      field: 'state',
       renderCell: ({ row }) => {
         return (
           <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary' }}>
-            {row?.balance}
+            {row?.state}
+          </Typography>
+        )
+      }
+    },
+
+    {
+      flex: 0.15,
+      minWidth: 120,
+      headerName: 'FDIC Number',
+      field: 'fdicNum',
+      renderCell: ({ row }) => {
+        return (
+          <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary' }}>
+            {row?.fdicNum}
+          </Typography>
+        )
+      }
+    },
+
+    {
+      flex: 0.15,
+      minWidth: 120,
+      headerName: 'FDIC Region',
+      field: 'fdicRegion',
+      renderCell: ({ row }) => {
+        return (
+          <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary' }}>
+            {row?.fdicRegion}
           </Typography>
         )
       }
@@ -148,12 +190,15 @@ export default function bankRequests() {
     {
       flex: 0.15,
       minWidth: 120,
-      headerName: 'Address',
-      field: 'address',
+      headerName: 'Total Assets',
+      field: 'totalAssets',
       renderCell: ({ row }) => {
         return (
           <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary' }}>
-            {row?.address}
+            {Number(row?.totalAssets).toLocaleString('en-US', {
+              style: 'currency',
+              currency: 'USD'
+            })}
           </Typography>
         )
       }
@@ -161,8 +206,24 @@ export default function bankRequests() {
     {
       flex: 0.15,
       minWidth: 120,
-      headerName: 'Status',
-      field: 'status',
+      headerName: 'Credit Limit',
+      field: 'creditLimit',
+      renderCell: ({ row }) => {
+        return (
+          <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary' }}>
+            {Number(row?.creditLimit).toLocaleString('en-US', {
+              style: 'currency',
+              currency: 'USD'
+            })}
+          </Typography>
+        )
+      }
+    },
+    {
+      flex: 0.15,
+      minWidth: 120,
+      headerName: 'Stake Holder',
+      field: 'stakeHolder',
       renderCell: ({ row }) => {
         if (row.invitation && row.invitation.length > 0) {
           return (
@@ -256,23 +317,35 @@ export default function bankRequests() {
   const handleRowSelectionChange = selectionModel => {
     if (selectionModel && selectionModel.length > 0) {
       // Map through the selected rows and extract their balances
-      console.log(
-        'Selected Row Data:',
-        store.find(row => row.id === selectionModel[0])
-      )
-
-      const selectedBalances = selectionModel.map(selectedId => {
+      const selectedRowData = selectionModel.map(selectedId => {
         const selectedRow = store.find(row => row.id === selectedId)
-        return selectedRow ? Number(selectedRow.balance.replace('$', '')) : 0
+        const creditLimit =
+          typeof selectedRow.creditLimit === 'string'
+            ? Number(selectedRow.creditLimit.replace(/[$,]/g, '')) || 0
+            : selectedRow.creditLimit || 0
+
+        return selectedRow
+          ? {
+              id: selectedRow.id,
+              bankName: selectedRow.bankName,
+              creditLimit
+            }
+          : null
       })
 
+      console.log('Selected Row Data:', selectedRowData)
+      setRequestedToBanks(selectedRowData)
+
       // Calculate the sum of balances
-      const sumOfBalances = selectedBalances.reduce((acc, balance) => acc + balance, 0)
+      const sumOfBalances = selectedRowData.reduce((acc, { creditLimit }) => acc + creditLimit, 0)
 
       setRequestedAmount(sumOfBalances)
 
       // Log both the array and its sum
-      console.log('Selected Rows Balances:', selectedBalances)
+      console.log(
+        'Selected Rows Balances:',
+        selectedRowData.map(({ creditLimit }) => creditLimit)
+      )
       console.log('Sum of Balances:', sumOfBalances)
     }
   }
@@ -281,8 +354,6 @@ export default function bankRequests() {
     const selectedBankId = event.target.value
     const selectedBankData = store.find(bank => bank.id === selectedBankId)
     setSelectedBank(selectedBankData)
-
-    console.log('selectedBankData:', selectedBankData)
   }
 
   const filteredBanks = store.filter(bank => bank.id !== (selectedBank ? selectedBank.id : null))
@@ -290,8 +361,9 @@ export default function bankRequests() {
   const topcards = [
     {
       title: 'Selected Bank',
-      data: selectedBank?.title,
-      bgcolor: 'primary'
+      data: selectedBank?.bankName,
+      bgcolor: 'primary',
+      icon: 'tabler:building'
     },
     {
       title: 'Required Amount',
@@ -299,7 +371,8 @@ export default function bankRequests() {
         style: 'currency',
         currency: 'USD'
       }),
-      bgcolor: 'warning'
+      bgcolor: 'error',
+      icon: 'tabler:currency-dollar'
     },
     {
       title: 'Requested Amount',
@@ -307,7 +380,8 @@ export default function bankRequests() {
         style: 'currency',
         currency: 'USD'
       }),
-      bgcolor: 'error'
+      bgcolor: 'warning',
+      icon: 'tabler:currency-dollar'
     }
   ]
 
@@ -339,7 +413,7 @@ export default function bankRequests() {
                     <MenuItem value=''>Select Bank</MenuItem>
                     {store.map(bank => (
                       <MenuItem key={bank.id} value={bank.id}>
-                        {bank.title}
+                        {bank?.bankName}
                       </MenuItem>
                     ))}
                   </Select>
@@ -388,7 +462,7 @@ export default function bankRequests() {
             }}
           >
             {/* Bank Name and other details (change this to breadcrumb) */}
-            <CardContent>
+            <CardContent style={{ marginTop: '-56px' }}>
               <Grid container spacing={6} mt={3}>
                 {topcards.map((topcard, i) => (
                   <Grid item xs={12} sm={4} key={i}>
@@ -434,7 +508,6 @@ export default function bankRequests() {
                 Send Request
               </Button>
             </CardContent>
-
             <Dialog
               BackdropProps={{
                 style: {
@@ -447,7 +520,12 @@ export default function bankRequests() {
               onClose={() => setSendRequestModal(false)}
             >
               <DialogContent>
-                <LoanRequestModal visible={setSendRequestModal} />
+                <LoanRequestModal
+                  visible={setSendRequestModal}
+                  requestedBy={selectedBank}
+                  requestedAmount={requestedAmount}
+                  requestedTo={requestedToBanks}
+                />
               </DialogContent>
             </Dialog>
           </Box>

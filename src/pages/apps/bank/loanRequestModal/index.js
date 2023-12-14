@@ -15,8 +15,9 @@ import { endpoint } from 'src/configs/endpoints'
 import { useAppDispatch } from 'src/store'
 import { bankList } from 'src/store/apps/bank'
 import CardContent from '@mui/material/CardContent'
+import CircularProgress from '@mui/material/CircularProgress'
 
-const LoanRequestModal = ({ id, visible }) => {
+const LoanRequestModal = ({ id, visible, requestedBy, requestedAmount, requestedTo }) => {
   const { reset } = useForm({
     mode: 'onChange'
   })
@@ -27,9 +28,43 @@ const LoanRequestModal = ({ id, visible }) => {
   }
 
   function SendRequest() {
-    toast.success('Loan request sent successfully!')
     visible(false)
     reset()
+  }
+
+  const [loading, setLoading] = React.useState(false)
+
+  async function SendLoanRequest() {
+    const requestedToIds = requestedTo.map(item => item.id)
+
+    const postData = {
+      bankId: requestedToIds,
+      amount: requestedAmount,
+      crisisBank: requestedBy.id
+    }
+
+    console.log('endpoint: ', endpoint.manageRequest, 'postData:', postData)
+
+    setLoading(true)
+
+    const response = await instance
+      .post(endpoint.manageRequest, postData, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: process.env.NEXT_PUBLIC_SENDGRID_KEY
+        }
+      })
+      .then(res => {
+        toast.success('Loan request sent successfully!')
+        handleVisiblity()
+        setLoading(false)
+        console.log('api request sent:', res.data)
+      })
+      .catch(err => {
+        console.log('could not send api request', err.response)
+        toast.error('Loan request failed!')
+        setLoading(false)
+      })
   }
 
   return (
@@ -38,11 +73,26 @@ const LoanRequestModal = ({ id, visible }) => {
         <Typography variant='h5' m={5}>
           Are you sure you want to the send Loan Request?
         </Typography>
+
         <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
           <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
-            <Button type='submit' variant='contained' sx={{ mr: 3 }} onClick={SendRequest}>
-              Send
+            <Button type='submit' variant='contained' sx={{ mr: 3 }} onClick={SendLoanRequest}>
+              {loading ? (
+                <CardContent
+                  sx={{
+                    padding: '0px',
+                    paddingBottom: '0px !important',
+                    height: '24px',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <CircularProgress color='secondary' size={24} />
+                </CardContent>
+              ) : (
+                'Send'
+              )}
             </Button>
+
             <Button variant='outlined' color='secondary' onClick={handleVisiblity}>
               Cancel
             </Button>

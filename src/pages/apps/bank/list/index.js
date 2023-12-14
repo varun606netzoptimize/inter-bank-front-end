@@ -139,8 +139,8 @@ const UserList = () => {
     {
       flex: 0.25,
       minWidth: 280,
-      field: 'title',
-      headerName: 'Title',
+      field: 'bankName',
+      headerName: 'Bank Name',
       renderCell: ({ row }) => {
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -155,10 +155,23 @@ const UserList = () => {
                   '&:hover': { color: 'primary.main' }
                 }}
               >
-                {row?.title}
+                {row?.bankName}
               </Typography>
             </Box>
           </Box>
+        )
+      }
+    },
+    {
+      flex: 0.15,
+      minWidth: 120,
+      headerName: 'City',
+      field: 'city',
+      renderCell: ({ row }) => {
+        return (
+          <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary' }}>
+            {row?.city}
+          </Typography>
         )
       }
     },
@@ -166,12 +179,40 @@ const UserList = () => {
     {
       flex: 0.15,
       minWidth: 120,
-      headerName: 'Balance',
-      field: 'balance',
+      headerName: 'State',
+      field: 'state',
       renderCell: ({ row }) => {
         return (
           <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary' }}>
-            {row?.balance}
+            {row?.state}
+          </Typography>
+        )
+      }
+    },
+
+    {
+      flex: 0.15,
+      minWidth: 120,
+      headerName: 'FDIC Number',
+      field: 'fdicNum',
+      renderCell: ({ row }) => {
+        return (
+          <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary' }}>
+            {row?.fdicNum}
+          </Typography>
+        )
+      }
+    },
+
+    {
+      flex: 0.15,
+      minWidth: 120,
+      headerName: 'FDIC Region',
+      field: 'fdicRegion',
+      renderCell: ({ row }) => {
+        return (
+          <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary' }}>
+            {row?.fdicRegion}
           </Typography>
         )
       }
@@ -179,12 +220,31 @@ const UserList = () => {
     {
       flex: 0.15,
       minWidth: 120,
-      headerName: 'Address',
-      field: 'address',
+      headerName: 'Total Assets',
+      field: 'totalAssets',
       renderCell: ({ row }) => {
         return (
           <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary' }}>
-            {row?.address}
+            {Number(row?.totalAssets).toLocaleString('en-US', {
+              style: 'currency',
+              currency: 'USD'
+            })}
+          </Typography>
+        )
+      }
+    },
+    {
+      flex: 0.15,
+      minWidth: 120,
+      headerName: 'Credit Limit',
+      field: 'creditLimit',
+      renderCell: ({ row }) => {
+        return (
+          <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary' }}>
+            {Number(row?.creditLimit).toLocaleString('en-US', {
+              style: 'currency',
+              currency: 'USD'
+            })}
           </Typography>
         )
       }
@@ -321,71 +381,8 @@ const UserList = () => {
     <Grid container spacing={6.5}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Search Filters' />
-          <CardContent>
-            <Grid container spacing={6}>
-              <Grid item sm={4} xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel id='role-select'>Select Role</InputLabel>
-                  <Select
-                    fullWidth
-                    value={role}
-                    id='select-role'
-                    label='Select Role'
-                    labelId='role-select'
-                    onChange={handleRoleChange}
-                    inputProps={{ placeholder: 'Select Role' }}
-                  >
-                    <MenuItem value=''>Select Role</MenuItem>
-                    <MenuItem value='admin'>Admin</MenuItem>
-                    <MenuItem value='author'>Author</MenuItem>
-                    <MenuItem value='editor'>Editor</MenuItem>
-                    <MenuItem value='maintainer'>Maintainer</MenuItem>
-                    <MenuItem value='subscriber'>Subscriber</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item sm={4} xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel id='plan-select'>Select Plan</InputLabel>
-                  <Select
-                    fullWidth
-                    value={plan}
-                    id='select-plan'
-                    label='Select Plan'
-                    labelId='plan-select'
-                    onChange={handlePlanChange}
-                    inputProps={{ placeholder: 'Select Plan' }}
-                  >
-                    <MenuItem value=''>Select Plan</MenuItem>
-                    <MenuItem value='basic'>Basic</MenuItem>
-                    <MenuItem value='company'>Company</MenuItem>
-                    <MenuItem value='enterprise'>Enterprise</MenuItem>
-                    <MenuItem value='team'>Team</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item sm={4} xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel id='status-select'>Select Status</InputLabel>
-                  <Select
-                    fullWidth
-                    value={status}
-                    id='select-status'
-                    label='Select Status'
-                    labelId='status-select'
-                    onChange={handleStatusChange}
-                    inputProps={{ placeholder: 'Select Role' }}
-                  >
-                    <MenuItem value=''>Select Role</MenuItem>
-                    <MenuItem value='pending'>Pending</MenuItem>
-                    <MenuItem value='active'>Active</MenuItem>
-                    <MenuItem value='inactive'>Inactive</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-          </CardContent>
+          <CardHeader title='Manage Banks' />
+
           {/* Send Invitation */}
           <Dialog
             BackdropProps={{

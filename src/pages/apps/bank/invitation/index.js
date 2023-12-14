@@ -1,158 +1,181 @@
 /* eslint-disable padding-line-between-statements */
-/* eslint-disable newline-before-return */
-'use client'
-
-// ** Library Imports
 import * as React from 'react'
 import * as yup from 'yup'
 import { Grid, Box, TextField, FormControl, Button, FormHelperText, Typography } from '@mui/material'
-import axios from 'axios'
-import toast from 'react-hot-toast'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import instance from 'src/axios/instance'
-import { endpoint } from 'src/configs/endpoints'
-import { useAppDispatch } from 'src/store'
-import { bankList } from 'src/store/apps/bank'
 
 const schema = yup.object().shape({
-  emailToCEO: yup.string().email('Enter a valid email').required('This field is required!'),
-  emailToCFO: yup.string().email('Enter a valid email').required('This field is required!'),
-  stakeHolder: yup.string().email('Enter a valid email').required('This field is required!')
+  stakeholders: yup.array().of(
+    yup.object().shape({
+      role: yup.string().required('This field is required!'),
+      name: yup.string().required('This field is required!'),
+      email: yup.string().email('Enter a valid email').required('This field is required!')
+    })
+  )
 })
-// eslint-disable-next-line padding-line-between-statements
+
 const Invitation = ({ id, closeModal }) => {
-  const dispatch = useAppDispatch()
-  const defaultValues = {
-    emailToCEO: '',
-    emailToCFO: '',
-    stakeHolder: ''
-  }
   const {
-    reset,
     control,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
+    register
   } = useForm({
-    defaultValues,
-    mode: 'onChange',
-    resolver: yupResolver(schema)
+    resolver: yupResolver(schema),
+    defaultValues: {
+      stakeholders: [
+        { role: 'CEO', name: '', email: '' },
+        { role: 'CFO', name: '', email: '' }
+      ]
+    }
   })
 
-  const onSubmit = async emailData => {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'stakeholders'
+  })
+
+  const onSubmit = async formData => {
     const value = {
       bankId: id,
-      emailToCEO: emailData.emailToCEO,
-      emailToCFO: emailData.emailToCFO,
-      stakeHolder: emailData.stakeHolder
+      stakeholders: formData.stakeholders.map(stakeholder => ({
+        role: stakeholder.role,
+        name: stakeholder.name,
+        email: stakeholder.email
+      }))
     }
-    const response = await instance
-      .post(endpoint.invite, value, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: process.env.NEXT_PUBLIC_SENDGRID_KEY
-        }
-      })
-      .then(res => {
-        toast.success(res.data)
-        closeModal(false)
-      })
-      .then(() => dispatch(bankList()))
-      .catch(err => {
-        closeModal(false)
-        toast.error(err?.response?.data.error)
-      })
+
+    console.log('value:', value)
+
+    // Your API request logic here
+  }
+
+  const addStakeholder = () => {
+    append({ role: '', name: '', email: '' })
+  }
+
+  const removeStakeholder = index => {
+    remove(index)
   }
 
   const handleClose = () => {
     closeModal(false)
-    reset()
   }
+
   return (
-    <Box p={1}>
-      <Grid container spacing={3}>
-        <Typography variant='h2' m={9}>
-          Send an invitation
-        </Typography>
-        <Grid item xs={12} display='flex' alignItems='stretch'>
-          <Box sx={{ p: theme => theme.spacing(0, 6, 6) }}>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <FormControl fullWidth sx={{ mb: 4 }}>
-                <Controller
-                  name='emailToCEO'
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field: { value, onChange } }) => (
-                    <TextField
-                      InputLabelProps={{ shrink: true }}
-                      type='email'
-                      value={value}
-                      label='Email CEO'
-                      onChange={onChange}
-                      error={Boolean(errors.emailToCEO)}
-                    />
+    <Grid container spacing={6.5}>
+      <Grid item xs={12}>
+        <Typography variant='h4'>Invite Stakeholders</Typography>
+        <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: '20px' }}>
+          {fields.map((stakeholder, index) => (
+            <Grid container spacing={6} key={stakeholder.id} style={{ marginTop: '-14px' }}>
+              <Grid item sm={4} xs={12}>
+                <FormControl fullWidth sx={{ mb: 4 }}>
+                  <Controller
+                    name={`stakeholders[${index}].role`}
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field: { value, onChange } }) => (
+                      <TextField
+                        InputLabelProps={{ shrink: true }}
+                        value={value}
+                        label='Role'
+                        onChange={onChange}
+                        error={Boolean(errors.stakeholders?.[index]?.role)}
+                      />
+                    )}
+                  />
+                  {errors.stakeholders?.[index]?.role && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {errors.stakeholders[index].role.message}
+                    </FormHelperText>
                   )}
-                />
-                {errors.emailToCEO && (
-                  <FormHelperText sx={{ color: 'error.main' }}>{errors.emailToCEO.message}</FormHelperText>
-                )}
-              </FormControl>
-
-              <FormControl fullWidth sx={{ mb: 4 }}>
-                <Controller
-                  name='emailToCFO'
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field: { value, onChange } }) => (
-                    <TextField
-                      InputLabelProps={{ shrink: true }}
-                      type='email'
-                      value={value}
-                      label='Email CFO'
-                      onChange={onChange}
-                      error={Boolean(errors.emailToCFO)}
-                    />
+                </FormControl>
+              </Grid>
+              <Grid item sm={4} xs={12}>
+                <FormControl fullWidth sx={{ mb: 4 }}>
+                  <Controller
+                    name={`stakeholders[${index}].name`}
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field: { value, onChange } }) => (
+                      <TextField
+                        InputLabelProps={{ shrink: true }}
+                        value={value}
+                        label='Name'
+                        onChange={onChange}
+                        error={Boolean(errors.stakeholders?.[index]?.name)}
+                      />
+                    )}
+                  />
+                  {errors.stakeholders?.[index]?.name && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {errors.stakeholders[index].name.message}
+                    </FormHelperText>
                   )}
-                />
-                {errors.emailToCFO && (
-                  <FormHelperText sx={{ color: 'error.main' }}>{errors.emailToCFO.message}</FormHelperText>
-                )}
-              </FormControl>
-
-              <FormControl fullWidth sx={{ mb: 4 }}>
-                <Controller
-                  name='stakeHolder'
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field: { value, onChange } }) => (
-                    <TextField
-                      InputLabelProps={{ shrink: true }}
-                      type='email'
-                      value={value}
-                      label='Optional'
-                      onChange={onChange}
-                      error={Boolean(errors.stakeHolder)}
-                    />
+                </FormControl>
+              </Grid>
+              <Grid item sm={4} xs={12}>
+                <FormControl fullWidth sx={{ mb: 4 }}>
+                  <Controller
+                    name={`stakeholders[${index}].email`}
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field: { value, onChange } }) => (
+                      <TextField
+                        InputLabelProps={{ shrink: true }}
+                        type='email'
+                        value={value}
+                        label='Email'
+                        onChange={onChange}
+                        error={Boolean(errors.stakeholders?.[index]?.email)}
+                      />
+                    )}
+                  />
+                  {errors.stakeholders?.[index]?.email && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {errors.stakeholders[index].email.message}
+                    </FormHelperText>
                   )}
-                />
-                {errors.stakeHolder && (
-                  <FormHelperText sx={{ color: 'error.main' }}>{errors.stakeHolder.message}</FormHelperText>
-                )}
-              </FormControl>
-
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Button type='submit' variant='contained' sx={{ mr: 3 }}>
-                  {id ? 'Update' : 'Submit'}
-                </Button>
-                <Button variant='outlined' color='secondary' onClick={handleClose}>
-                  Cancel
-                </Button>
-              </Box>
-            </form>
+                </FormControl>
+              </Grid>
+              {index >= 2 && (
+                <Grid item xs={12} style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '-28px' }}>
+                  <Button
+                    variant='outlined'
+                    size='small'
+                    color='error'
+                    sx={{ ml: 2 }}
+                    onClick={() => removeStakeholder(index)}
+                  >
+                    Remove
+                  </Button>
+                </Grid>
+              )}
+            </Grid>
+          ))}
+          <Button
+            variant='outlined'
+            color='success'
+            sx={{ mr: 3 }}
+            style={{ marginTop: '14px' }}
+            onClick={addStakeholder}
+          >
+            Add Stakeholder
+          </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', marginTop: '14px' }}>
+            <Button type='submit' variant='contained' sx={{ mr: 3 }}>
+              {'Submit'}
+            </Button>
+            <Button variant='outlined' color='secondary' onClick={handleClose}>
+              Cancel
+            </Button>
           </Box>
-        </Grid>
+        </form>
       </Grid>
-    </Box>
+    </Grid>
   )
 }
+
 export default Invitation

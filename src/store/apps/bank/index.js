@@ -19,8 +19,6 @@ export const bankList = createAsyncThunk('bankList', async data => {
     const response = await instance.get(endpoint.bankList, data)
 
     return response.data
-
-    console.log('Bank List Data: ', response.data)
   } catch (error) {
     throw error
   }

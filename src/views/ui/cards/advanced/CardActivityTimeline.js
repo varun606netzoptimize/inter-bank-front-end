@@ -75,7 +75,7 @@ const CardActivityTimeline = () => {
                   justifyContent: 'space-between'
                 }}
               >
-                <Typography sx={{ mr: 2, fontWeight: 500 }}>Client Meeting</Typography>
+                <Typography sx={{ mr: 2, fontWeight: 500 }}>Client Measdasdeting</Typography>
                 <Typography variant='body2' sx={{ color: 'text.disabled' }}>
                   Today
                 </Typography>
